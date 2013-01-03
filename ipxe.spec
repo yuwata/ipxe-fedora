@@ -31,12 +31,12 @@
 #
 # And then change these two:
 
-%global date 20120328
-%global hash aac9718
+%global date 20130103
+%global hash 717279a
 
 Name:    ipxe
 Version: %{date}
-Release: 2.git%{hash}%{?dist}
+Release: 1.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -113,6 +113,12 @@ cp -a %{SOURCE1} .
 
 %build
 %ifarch %{buildarches}
+# The src/Makefile.housekeeping relies on .git/index existing
+# but since we pass GITVERSION= to make, we don't actally need
+# it to be the real deal, so just touch it to let the build pass
+mkdir .git
+touch .git/index
+
 ISOLINUX_BIN=/usr/share/syslinux/isolinux.bin
 cd src
 # ath9k drivers are too big for an Option ROM
@@ -120,7 +126,8 @@ rm -rf drivers/net/ath/ath9k
 
 #make %{?_smp_mflags} bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms \
 make bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms \
-                   ISOLINUX_BIN=${ISOLINUX_BIN} NO_WERROR=1 V=1
+                   ISOLINUX_BIN=${ISOLINUX_BIN} NO_WERROR=1 V=1 \
+		   GITVERSION=%{hash}
 %endif
 
 %install
@@ -170,6 +177,9 @@ done
 %endif
 
 %changelog
+* Thu Jan  3 2013 Daniel P. Berrange <berrange@redhat.com> - 20130103-1.git717279a
+- Updated to latest GIT snapshot
+
 * Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20120328-2.gitaac9718
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
