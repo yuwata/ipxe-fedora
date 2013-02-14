@@ -36,7 +36,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 1.git%{hash}%{?dist}
+Release: 2.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -177,6 +177,9 @@ done
 %endif
 
 %changelog
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20130103-2.git717279a
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
 * Thu Jan  3 2013 Daniel P. Berrange <berrange@redhat.com> - 20130103-1.git717279a
 - Updated to latest GIT snapshot
 
