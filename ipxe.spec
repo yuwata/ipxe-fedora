@@ -31,12 +31,12 @@
 #
 # And then change these two:
 
-%global date 20130103
-%global hash 717279a
+%global date 20130517
+%global hash c4bce43
 
 Name:    ipxe
 Version: %{date}
-Release: 3.git%{hash}%{?dist}
+Release: 1.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -181,6 +181,9 @@ done
 %endif
 
 %changelog
+* Fri May 17 2013 Daniel P. Berrange <berrange@redhat.com> - 20130517-1.gitc4bce43
+- Update to latest upstream snapshot
+
 * Fri May 17 2013 Daniel P. Berrange <berrange@redhat.com> - 20130103-3.git717279a
 - Fix build with GCC 4.8 (rhbz #914091)
 
