@@ -1,0 +1,30 @@
+diff --git a/src/arch/i386/interface/pxe/pxe_call.c b/src/arch/i386/interface/pxe/pxe_call.c
+index b8e73a0..5f8ed07 100644
+--- a/src/arch/i386/interface/pxe/pxe_call.c
++++ b/src/arch/i386/interface/pxe/pxe_call.c
+@@ -265,12 +265,14 @@ int pxe_start_nbp ( void ) {
+ 		DBG ( "Restarting NBP (%x)\n", jmp );
+ 
+ 	/* Far call to PXE NBP */
+-	__asm__ __volatile__ ( REAL_CODE ( "movw %%cx, %%es\n\t"
++	__asm__ __volatile__ ( REAL_CODE ( "pushl %%ebp\n\t"
++					   "movw %%cx, %%es\n\t"
+ 					   "pushw %%es\n\t"
+ 					   "pushw %%di\n\t"
+ 					   "sti\n\t"
+ 					   "lcall $0, $0x7c00\n\t"
+-					   "addw $4, %%sp\n\t" )
++					   "addw $4, %%sp\n\t" 
++					   "popl %%ebp\n\t" )
+ 			       : "=a" ( rc ), "=b" ( discard_b ),
+ 				 "=c" ( discard_c ), "=d" ( discard_d ),
+ 				 "=D" ( discard_D )
+@@ -278,7 +280,7 @@ int pxe_start_nbp ( void ) {
+ 			         "c" ( rm_cs ),
+ 			         "d" ( virt_to_phys ( &pxenv ) ),
+ 				 "D" ( __from_text16 ( &ppxe ) )
+-			       : "esi", "ebp", "memory" );
++			       : "esi", "memory" );
+ 
+ 	return rc;
+ }

@@ -36,7 +36,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 2.git%{hash}%{?dist}
+Release: 3.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -49,6 +49,9 @@ Source1: USAGE
 # go upstream. Modifying the general config header file is the
 # intended means for downstream customization.
 Patch1: %{name}-banner-timeout.patch
+# GCC >= 4.8 doesn't like the use of 'ebp' in asm
+# https://bugzilla.redhat.com/show_bug.cgi?id=914091
+Patch2: %{name}-asm.patch
 
 %ifarch %{buildarches}
 BuildRequires: perl
@@ -109,6 +112,7 @@ DNS, HTTP, iSCSI, etc.
 %prep
 %setup -q -n %{name}-%{version}-git%{hash}
 %patch1 -p1
+%patch2 -p1
 cp -a %{SOURCE1} .
 
 %build
@@ -177,6 +181,9 @@ done
 %endif
 
 %changelog
+* Fri May 17 2013 Daniel P. Berrange <berrange@redhat.com> - 20130103-3.git717279a
+- Fix build with GCC 4.8 (rhbz #914091)
+
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20130103-2.git717279a
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
