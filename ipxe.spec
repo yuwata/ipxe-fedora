@@ -15,9 +15,9 @@
 # binary RPM will be noarch, so other archs will still be able
 # to use the binary ROMs.
 #
-# We could also use cross-compilation, but EDK II does not support
-# big-endian hosts.
-%global buildarches x86_64
+# We do cross-compilation for 32->64-bit, but not for other arches
+# because EDK II does not support big-endian hosts.
+%global buildarches %{ix86} x86_64
 
 # debugging firmwares does not goes the same way as a normal program.
 # moreover, all architectures providing debuginfo for a single noarch
@@ -62,6 +62,10 @@ BuildRequires: syslinux
 BuildRequires: mtools
 BuildRequires: mkisofs
 BuildRequires: edk2-tools
+
+BuildRequires: binutils-devel
+BuildRequires: binutils-x86_64-linux-gnu gcc-x86_64-linux-gnu
+
 Obsoletes: gpxe <= 1.0.1
 
 %package bootimgs
@@ -135,14 +139,15 @@ rm -rf drivers/net/ath/ath9k
 #make %{?_smp_mflags} bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms \
 make bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms \
                    ISOLINUX_BIN=${ISOLINUX_BIN} NO_WERROR=1 V=1 \
-		   GITVERSION=%{hash}
+		   GITVERSION=%{hash} \
+		   CROSS_COMPILE=x86_64-linux-gnu-
 
 # build roms with efi support for qemu
 mkdir bin-combined
 for rom in %qemuroms; do
-  make NO_WERROR=1 V=1 GITVERSION=%{hash} bin/${rom}.rom
-  make NO_WERROR=1 V=1 GITVERSION=%{hash} bin-i386-efi/${rom}.efidrv
-  make NO_WERROR=1 V=1 GITVERSION=%{hash} bin-x86_64-efi/${rom}.efidrv
+  make NO_WERROR=1 V=1 GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin/${rom}.rom
+  make NO_WERROR=1 V=1 GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-i386-efi/${rom}.efidrv
+  make NO_WERROR=1 V=1 GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-x86_64-efi/${rom}.efidrv
   vid="0x${rom%%????}"
   did="0x${rom#????}"
   EfiRom -f "$vid" -i "$did" --pci23 \
@@ -209,6 +214,7 @@ done
 
 %changelog
 * Mon May 20 2013 Paolo Bonzini <pbonzini@redhat.com> - 20130103-3.git717279a
+- Fix BuildRequires, use cross-compiler when building on 32-bit i686
 - Build UEFI drivers for QEMU and include them (patch from Gerd Hoffmann.
   BZ#958875)
 
