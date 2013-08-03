@@ -39,7 +39,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 2.git%{hash}%{?dist}
+Release: 3.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -213,6 +213,9 @@ done
 %endif
 
 %changelog
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20130517-3.gitc4bce43
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Mon May 20 2013 Paolo Bonzini <pbonzini@redhat.com> - 20130103-3.git717279a
 - Fix BuildRequires, use cross-compiler when building on 32-bit i686
 - Build UEFI drivers for QEMU and include them (patch from Gerd Hoffmann.
