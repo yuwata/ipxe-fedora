@@ -19,7 +19,7 @@
 # because EDK II does not support big-endian hosts.
 %global buildarches %{ix86} x86_64
 
-# debugging firmwares does not goes the same way as a normal program.
+# debugging firmwares does not go the same way as a normal program.
 # moreover, all architectures providing debuginfo for a single noarch
 # package is currently clashing in koji, so don't bother.
 %global debug_package %{nil}
@@ -34,12 +34,12 @@
 #
 # And then change these two:
 
-%global date 20130517
-%global hash c4bce43
+%global date 20140303
+%global hash ff1e7fc7
 
 Name:    ipxe
 Version: %{date}
-Release: 3.git%{hash}%{?dist}
+Release: 1.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -48,13 +48,11 @@ URL:     http://ipxe.org/
 
 Source0: %{name}-%{version}-git%{hash}.tar.gz
 Source1: USAGE
-# Remove 2 second startup wait. This patch is not intended to
-# go upstream. Modifying the general config header file is the
-# intended means for downstream customization.
-Patch1: %{name}-banner-timeout.patch
-# GCC >= 4.8 doesn't like the use of 'ebp' in asm
-# https://bugzilla.redhat.com/show_bug.cgi?id=914091
-Patch2: %{name}-asm.patch
+
+# Allow access to ipxe prompt if VM is set to pxe boot (bz #842932)
+Patch0001: 0001-Customize-ROM-banner-timeout.patch
+# Enable PNG support (bz #1058176)
+Patch0002: 0002-config-Enable-PNG-support.patch
 
 %ifarch %{buildarches}
 BuildRequires: perl
@@ -119,8 +117,12 @@ DNS, HTTP, iSCSI, etc.
 
 %prep
 %setup -q -n %{name}-%{version}-git%{hash}
-%patch1 -p1
-%patch2 -p1
+
+# Allow access to ipxe prompt if VM is set to pxe boot (bz #842932)
+%patch0001 -p1
+# Enable PNG support (bz #1058176)
+%patch0002 -p1
+
 cp -a %{SOURCE1} .
 
 %build
@@ -136,11 +138,11 @@ cd src
 # ath9k drivers are too big for an Option ROM
 rm -rf drivers/net/ath/ath9k
 
-#make %{?_smp_mflags} bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms \
-make bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms \
-                   ISOLINUX_BIN=${ISOLINUX_BIN} NO_WERROR=1 V=1 \
-		   GITVERSION=%{hash} \
-		   CROSS_COMPILE=x86_64-linux-gnu-
+make %{?_smp_mflags} \
+    bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms \
+    ISOLINUX_BIN=${ISOLINUX_BIN} NO_WERROR=1 V=1 \
+    GITVERSION=%{hash} \
+    CROSS_COMPILE=x86_64-linux-gnu-
 
 # build roms with efi support for qemu
 mkdir bin-combined
@@ -213,6 +215,10 @@ done
 %endif
 
 %changelog
+* Mon Mar 03 2014 Cole Robinson <crobinso@redhat.com> - 20140303-1.gitff1e7fc7
+- Allow access to ipxe prompt if VM is set to pxe boot (bz #842932)
+- Enable PNG support (bz #1058176)
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20130517-3.gitc4bce43
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
