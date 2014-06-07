@@ -39,7 +39,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 1.git%{hash}%{?dist}
+Release: 2.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -215,6 +215,9 @@ done
 %endif
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20140303-2.gitff1e7fc7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Mon Mar 03 2014 Cole Robinson <crobinso@redhat.com> - 20140303-1.gitff1e7fc7
 - Allow access to ipxe prompt if VM is set to pxe boot (bz #842932)
 - Enable PNG support (bz #1058176)
