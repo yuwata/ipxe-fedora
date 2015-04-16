@@ -2,3 +2,4 @@
 noarch/
 .build*.log
 *.src.rpm
+/ipxe-20150407-gitdc795b9f.tar.xz

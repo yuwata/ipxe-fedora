@@ -1,0 +1,160 @@
+From 9e870d92035ec7ca946e702236bfe104e964f8c6 Mon Sep 17 00:00:00 2001
+From: Laszlo Ersek <lersek@redhat.com>
+Date: Thu, 22 Jan 2015 22:05:35 +0100
+Subject: [PATCH 1/2] efi_snp: improve compliance with the
+ EFI_SIMPLE_NETWORK_PROTOCOL spec
+
+The efi_snp interface dates back to 2008, when the GetStatus() interface
+must have been seriously under-specified. The UEFI Specification (2.4)
+specifies EFI_SIMPLE_NETWORK_PROTOCOL in detail however. In short:
+
+- the Transmit() interface is assumed to link (not copy) the SNP client's
+  buffer and return at once (without blocking), taking ownership of the
+  buffer temporarily;
+
+- the GetStatus() interface releases one of the completed (transmitted or
+  internally copied) buffers back to the caller. If there are several
+  completed buffers, it is unspecified which one is returned.
+
+The EFI build of the grub boot loader actually verifies the buffer address
+returned by GetStatus(), therefore in efi_snp we must at least fake the
+queueing of client buffers. This patch doesn't track client buffers
+together with the internally queued io_buffer structures, we consider a
+client buffer recyclable as soon as we make a deep copy of it and queue
+the copy internally.
+
+Signed-off-by: Laszlo Ersek <lersek@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ src/include/ipxe/efi/efi_snp.h |  6 +++++
+ src/interface/efi/efi_snp.c    | 54 ++++++++++++++++++++++++------------------
+ 2 files changed, 37 insertions(+), 23 deletions(-)
+
+diff --git a/src/include/ipxe/efi/efi_snp.h b/src/include/ipxe/efi/efi_snp.h
+index a18bced..863a81a 100644
+--- a/src/include/ipxe/efi/efi_snp.h
++++ b/src/include/ipxe/efi/efi_snp.h
+@@ -18,6 +18,8 @@
+ #include <ipxe/efi/Protocol/HiiDatabase.h>
+ #include <ipxe/efi/Protocol/LoadFile.h>
+ 
++#define MAX_RECYCLED_TXBUFS 64
++
+ /** An SNP device */
+ struct efi_snp_device {
+ 	/** List of SNP devices */
+@@ -44,6 +46,10 @@ struct efi_snp_device {
+ 	 * Used in order to generate TX completions.
+ 	 */
+ 	unsigned int tx_count_txbufs;
++	/** Holds the addresses of recycled SNP client buffers; a ring. */
++	void *tx_recycled_txbufs[MAX_RECYCLED_TXBUFS];
++	/** The index of the first buffer to return to the SNP client. */
++	unsigned tx_first_txbuf;
+ 	/** Outstanding RX packet count (via "interrupt status") */
+ 	unsigned int rx_count_interrupts;
+ 	/** Outstanding RX packet count (via WaitForPacket event) */
+diff --git a/src/interface/efi/efi_snp.c b/src/interface/efi/efi_snp.c
+index 67fba34..c21af33 100644
+--- a/src/interface/efi/efi_snp.c
++++ b/src/interface/efi/efi_snp.c
+@@ -68,6 +68,14 @@ static void efi_snp_set_state ( struct efi_snp_device *snpdev ) {
+ 		 */
+ 		mode->State = EfiSimpleNetworkInitialized;
+ 	}
++
++	if (mode->State != EfiSimpleNetworkInitialized) {
++		/* Zero the number of recycled buffers when moving to any other
++		 * state than Initialized. Transmit() and GetStatus() are only
++		 * valid in Initialized.
++		 */
++		snpdev->tx_count_txbufs = 0;
++	}
+ }
+ 
+ /**
+@@ -446,12 +454,12 @@ efi_snp_nvdata ( EFI_SIMPLE_NETWORK_PROTOCOL *snp, BOOLEAN read,
+  *
+  * @v snp		SNP interface
+  * @v interrupts	Interrupt status, or NULL
+- * @v txbufs		Recycled transmit buffer address, or NULL
++ * @v txbuf		Recycled transmit buffer address, or NULL
+  * @ret efirc		EFI status code
+  */
+ static EFI_STATUS EFIAPI
+ efi_snp_get_status ( EFI_SIMPLE_NETWORK_PROTOCOL *snp,
+-		     UINT32 *interrupts, VOID **txbufs ) {
++		     UINT32 *interrupts, VOID **txbuf ) {
+ 	struct efi_snp_device *snpdev =
+ 		container_of ( snp, struct efi_snp_device, snp );
+ 
+@@ -485,30 +493,22 @@ efi_snp_get_status ( EFI_SIMPLE_NETWORK_PROTOCOL *snp,
+ 		DBGC2 ( snpdev, " INTS:%02x", *interrupts );
+ 	}
+ 
+-	/* TX completions.  It would be possible to design a more
+-	 * idiotic scheme for this, but it would be a challenge.
+-	 * According to the UEFI header file, txbufs will be filled in
+-	 * with a list of "recycled transmit buffers" (i.e. completed
+-	 * TX buffers).  Observant readers may care to note that
+-	 * *txbufs is a void pointer.  Precisely how a list of
+-	 * completed transmit buffers is meant to be represented as an
+-	 * array of voids is left as an exercise for the reader.
+-	 *
+-	 * The only users of this interface (MnpDxe/MnpIo.c and
+-	 * PxeBcDxe/Bc.c within the EFI dev kit) both just poll until
+-	 * seeing a non-NULL result return in txbufs.  This is valid
+-	 * provided that they do not ever attempt to transmit more
+-	 * than one packet concurrently (and that TX never times out).
++	/* In efi_snp_transmit() we enqueue packets by copying them (not by
++	 * linking them), hence we can recycle them immediately to the SNP
++	 * client.
+ 	 */
+-	if ( txbufs ) {
+-		if ( snpdev->tx_count_txbufs &&
+-		     list_empty ( &snpdev->netdev->tx_queue ) ) {
+-			*txbufs = "Which idiot designed this API?";
++	if ( txbuf ) {
++		if ( snpdev->tx_count_txbufs ) {
++			unsigned first;
++
++			first = snpdev->tx_first_txbuf++;
++			snpdev->tx_first_txbuf %= MAX_RECYCLED_TXBUFS;
++			*txbuf = snpdev->tx_recycled_txbufs[first];
+ 			snpdev->tx_count_txbufs--;
+ 		} else {
+-			*txbufs = NULL;
++			*txbuf = NULL;
+ 		}
+-		DBGC2 ( snpdev, " TX:%s", ( *txbufs ? "some" : "none" ) );
++		DBGC2 ( snpdev, " TX:%p", *txbuf );
+ 	}
+ 
+ 	DBGC2 ( snpdev, "\n" );
+@@ -560,6 +560,12 @@ efi_snp_transmit ( EFI_SIMPLE_NETWORK_PROTOCOL *snp,
+ 	if ( efi_snp_claimed )
+ 		return EFI_NOT_READY;
+ 
++	assert ( snpdev->tx_count_txbufs <= MAX_RECYCLED_TXBUFS );
++	if ( snpdev->tx_count_txbufs == MAX_RECYCLED_TXBUFS ) {
++		/* No room to recycle another buffer. */
++		return EFI_NOT_READY;
++	}
++
+ 	/* Sanity checks */
+ 	if ( ll_header_len ) {
+ 		if ( ll_header_len != ll_protocol->ll_header_len ) {
+@@ -626,7 +632,9 @@ efi_snp_transmit ( EFI_SIMPLE_NETWORK_PROTOCOL *snp,
+ 
+ 	/* Record transmission as outstanding */
+ 	snpdev->tx_count_interrupts++;
+-	snpdev->tx_count_txbufs++;
++	snpdev->tx_recycled_txbufs[(snpdev->tx_first_txbuf +
++				    snpdev->tx_count_txbufs++
++				   ) % MAX_RECYCLED_TXBUFS] = data;
+ 
+ 	return 0;
+ 
+-- 
+1.8.3.1
+

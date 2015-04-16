@@ -1,0 +1,102 @@
+From 2daea2b8dd2c504a4f76a6b0b67bd3c4a2957fc7 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Tue, 10 Feb 2015 14:28:09 +0100
+Subject: [PATCH 2/2] [efi] make load file protocol optional
+
+The load file implementation added by commit
+c7c3d839fc9120aee28de9aabe452dc85ad91502 doesn't support loading
+arbitrary files from the tftp server, so efi applications trying
+to do exactly that fail to boot:
+
+  iPXE 1.0.0+ (17ace) -- Open Source Network Boot Firmware -- http://ipxe.org
+  Features: HTTP DNS TFTP EFI Menu
+
+  net0: 52:54:00:47:d3:07 using virtio-net on PCI00:09.0 (open)
+    [Link:up, TX:0 TXE:0 RX:13 RXE:2]
+    [RXE: 2 x "Operation not supported (http://ipxe.org/3c086083)"]
+  Configuring (net0 52:54:00:47:d3:07)...... ok
+  net0: 192.168.132.93/255.255.255.0 gw 192.168.132.1
+  Next server: 192.168.132.1
+  Filename: shim.efi
+  tftp://192.168.132.1/shim.efi... ok
+  Failed to open grubx64.efi - Not Found
+  Failed to load image grubx64.efi: Not Found
+  Failed to open MokManager.efi - Not Found
+  Failed to load image MokManager.efi: Not Found
+  Could not boot image: Error 0x7f04828e (http://ipxe.org/7f04828e)
+
+  Boot Failed. EFI Network
+
+This is not acceptable for qemu.  efi pxe configurations which work
+just fine with real hardware must work with qemu virtual machines too.
+
+This patch adds a config option for the load file protocol
+implementation, to allow it being disabled, so we can turn it off
+for the pxe roms shipped with qemu.
+
+The default for the new option maintains current behavior, i.e.
+load file is enabled unless you override it in config/local/general.h
+
+Suggested-by: Laszlo Ersek <lersek@redhat.com>
+
+See discussion here:
+  http://lists.ipxe.org/pipermail/ipxe-devel/2015-February/003979.html
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ src/config/general.h        | 6 ++++++
+ src/interface/efi/efi_snp.c | 5 +++++
+ 2 files changed, 11 insertions(+)
+
+diff --git a/src/config/general.h b/src/config/general.h
+index 65c1f85..8c91601 100644
+--- a/src/config/general.h
++++ b/src/config/general.h
+@@ -142,6 +142,12 @@ FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
+ #undef	NONPNP_HOOK_INT19	/* Hook INT19 on non-PnP BIOSes */
+ 
+ /*
++ * EFI specific options
++ *
++ */
++#define EFI_PROTO_LOAD_FILE	/* register LOAD_FILE protocol */
++
++/*
+  * Error message tables to include
+  *
+  */
+diff --git a/src/interface/efi/efi_snp.c b/src/interface/efi/efi_snp.c
+index c21af33..85f4fa0 100644
+--- a/src/interface/efi/efi_snp.c
++++ b/src/interface/efi/efi_snp.c
+@@ -34,6 +34,7 @@ FILE_LICENCE ( GPL2_OR_LATER );
+ #include <ipxe/efi/efi_utils.h>
+ #include <ipxe/efi/efi_snp.h>
+ #include <usr/autoboot.h>
++#include <config/general.h>
+ 
+ /** List of SNP devices */
+ static LIST_HEAD ( efi_snp_devices );
+@@ -1033,7 +1034,9 @@ static int efi_snp_probe ( struct net_device *netdev ) {
+ 			&efi_nii_protocol_guid, &snpdev->nii,
+ 			&efi_nii31_protocol_guid, &snpdev->nii,
+ 			&efi_component_name2_protocol_guid, &snpdev->name2,
++#ifdef EFI_PROTO_LOAD_FILE
+ 			&efi_load_file_protocol_guid, &snpdev->load_file,
++#endif
+ 			NULL ) ) != 0 ) {
+ 		rc = -EEFI ( efirc );
+ 		DBGC ( snpdev, "SNPDEV %p could not install protocols: "
+@@ -1082,7 +1085,9 @@ static int efi_snp_probe ( struct net_device *netdev ) {
+ 			&efi_nii_protocol_guid, &snpdev->nii,
+ 			&efi_nii31_protocol_guid, &snpdev->nii,
+ 			&efi_component_name2_protocol_guid, &snpdev->name2,
++#ifdef EFI_PROTO_LOAD_FILE
+ 			&efi_load_file_protocol_guid, &snpdev->load_file,
++#endif
+ 			NULL );
+  err_install_protocol_interface:
+ 	free ( snpdev->path );
+-- 
+1.8.3.1
+

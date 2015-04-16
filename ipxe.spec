@@ -29,30 +29,30 @@
 # snapshots using the folowing commands:
 #
 # $ hash=`git log -1 --format='%h'`
-# $ date=`date '+%Y%m%d'`
-# $ git archive --output ipxe-${date}-git${hash}.tar.gz --prefix ipxe-${date}-git${hash}/ ${hash}
+# $ date=`git log -1 --format='%cd' --date=short | tr -d -`
+# $ git archive --prefix ipxe-${date}-git${hash}/ ${hash} | xz -7e > ipxe-${date}-git${hash}.tar.xz
 #
 # And then change these two:
 
-%global date 20140303
-%global hash ff1e7fc7
+%global date 20150407
+%global hash dc795b9f
 
 Name:    ipxe
 Version: %{date}
-Release: 3.git%{hash}%{?dist}
+Release: 1.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
-License: GPLv2 and BSD
+License: GPLv2 with additional permissions and BSD
 URL:     http://ipxe.org/
 
-Source0: %{name}-%{version}-git%{hash}.tar.gz
+Source0: %{name}-%{version}-git%{hash}.tar.xz
 Source1: USAGE
+Source2: config.local.general.h
 
-# Allow access to ipxe prompt if VM is set to pxe boot (bz #842932)
-Patch0001: 0001-Customize-ROM-banner-timeout.patch
-# Enable PNG support (bz #1058176)
-Patch0002: 0002-config-Enable-PNG-support.patch
+# From QEMU
+Patch1001: qemu-0001-efi_snp-improve-compliance-with-the-EFI_SIMPLE_NETWO.patch
+Patch1002: qemu-0002-efi-make-load-file-protocol-optional.patch
 
 %ifarch %{buildarches}
 BuildRequires: perl
@@ -60,6 +60,7 @@ BuildRequires: syslinux
 BuildRequires: mtools
 BuildRequires: mkisofs
 BuildRequires: edk2-tools
+BuildRequires: xz-devel
 
 BuildRequires: binutils-devel
 BuildRequires: binutils-x86_64-linux-gnu gcc-x86_64-linux-gnu
@@ -118,12 +119,14 @@ DNS, HTTP, iSCSI, etc.
 %prep
 %setup -q -n %{name}-%{version}-git%{hash}
 
-# Allow access to ipxe prompt if VM is set to pxe boot (bz #842932)
-%patch0001 -p1
-# Enable PNG support (bz #1058176)
-%patch0002 -p1
+# From QEMU
+%patch1001 -p1
+%patch1002 -p1
 
 cp -a %{SOURCE1} .
+
+# Apply local configuration tweaks
+cp -a %{SOURCE2} src/config/local/general.h
 
 %build
 %ifarch %{buildarches}
@@ -202,19 +205,26 @@ done
 %{_datadir}/%{name}/ipxe.dsk
 %{_datadir}/%{name}/ipxe.lkrn
 %{_datadir}/%{name}/undionly.kpxe
-%doc COPYING COPYRIGHTS USAGE
+%doc COPYING COPYING.GPLv2 COPYING.UBDL USAGE
 
 %files roms -f rom.list
 %dir %{_datadir}/%{name}
-%doc COPYING COPYRIGHTS
+%doc COPYING COPYING.GPLv2 COPYING.UBDL
 
 %files roms-qemu -f qemu.rom.list
 %dir %{_datadir}/%{name}
 %dir %{_datadir}/%{name}.efi
-%doc COPYING COPYRIGHTS
+%doc COPYING COPYING.GPLv2 COPYING.UBDL
 %endif
 
 %changelog
+* Thu Apr 16 2015 Paolo Bonzini <pbonzini@redhat.com> - 20150407-1.gitdc795b9f
+- Update to latest upstream snapshot
+- Switch source to .tar.xz
+- Include patches from QEMU submodule
+- Use config file for configuration
+- Distribute additional permissions on top of GPLv2 ("UBDL")
+
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20140303-3.gitff1e7fc7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
