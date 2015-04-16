@@ -1,0 +1,79 @@
+From 755d2b8f6be681a2e620534b237471b75f28ed8c Mon Sep 17 00:00:00 2001
+From: Michael Brown <mcb30@ipxe.org>
+Date: Mon, 13 Apr 2015 12:06:59 +0100
+Subject: [PATCH] [efi] Ensure drivers are disconnected when ExitBootServices()
+ is called
+
+We hook the UEFI ExitBootServices() event and use it to trigger a call
+to shutdown_boot().  This does not automatically cause drivers to be
+disconnected from their devices, since device enumeration is now
+handled by the UEFI core rather than by iPXE.  (Under the old and
+dubiously compatible device model, iPXE used to perform its own device
+enumeration and so the call to shutdown_boot() would indeed have
+caused drivers to be disconnected.)
+
+Fix by replicating parts of the dummy "EFI root device" from
+efiprefix.c to efidrvprefix.c, so that the call to shutdown_boot()
+will call efi_driver_disconnect_all().
+
+Originally-fixed-by: Laszlo Ersek <lersek@redhat.com>
+Tested-by: Laszlo Ersek <lersek@redhat.com>
+Signed-off-by: Michael Brown <mcb30@ipxe.org>
+---
+ src/arch/x86/prefix/efidrvprefix.c | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
+
+diff --git a/src/arch/x86/prefix/efidrvprefix.c b/src/arch/x86/prefix/efidrvprefix.c
+index 3daefd0..4fbb19f 100644
+--- a/src/arch/x86/prefix/efidrvprefix.c
++++ b/src/arch/x86/prefix/efidrvprefix.c
+@@ -21,7 +21,9 @@ FILE_LICENCE ( GPL2_OR_LATER );
+ 
+ #include <stdlib.h>
+ #include <ipxe/init.h>
++#include <ipxe/device.h>
+ #include <ipxe/efi/efi.h>
++#include <ipxe/efi/efi_driver.h>
+ 
+ /**
+  * EFI entry point
+@@ -44,3 +46,36 @@ EFI_STATUS EFIAPI _efidrv_start ( EFI_HANDLE image_handle,
+ 
+ 	return 0;
+ }
++
++/**
++ * Probe EFI root bus
++ *
++ * @v rootdev		EFI root device
++ */
++static int efi_probe ( struct root_device *rootdev __unused ) {
++
++	/* Do nothing */
++	return 0;
++}
++
++/**
++ * Remove EFI root bus
++ *
++ * @v rootdev		EFI root device
++ */
++static void efi_remove ( struct root_device *rootdev __unused ) {
++
++	efi_driver_disconnect_all();
++}
++
++/** EFI root device driver */
++static struct root_driver efi_root_driver = {
++	.probe = efi_probe,
++	.remove = efi_remove,
++};
++
++/** EFI root device */
++struct root_device efi_root_device __root_device = {
++	.dev = { .name = "EFI" },
++	.driver = &efi_root_driver,
++};
+-- 
+2.3.5
+

@@ -39,7 +39,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 1.git%{hash}%{?dist}
+Release: 2.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -49,6 +49,11 @@ URL:     http://ipxe.org/
 Source0: %{name}-%{version}-git%{hash}.tar.xz
 Source1: USAGE
 Source2: config.local.general.h
+
+# From upstream commit b12b1b620fffc89e86af3879a945e7ffaa7c141d
+Patch0001: 0001-virtio-Downgrade-per-iobuf-debug-messages-to-DBGC2.patch
+# From upstream commit 755d2b8f6be681a2e620534b237471b75f28ed8c
+Patch0002: 0002-efi-Ensure-drivers-are-disconnected-when-ExitBootSer.patch
 
 # From QEMU
 Patch1001: qemu-0001-efi_snp-improve-compliance-with-the-EFI_SIMPLE_NETWO.patch
@@ -119,6 +124,9 @@ DNS, HTTP, iSCSI, etc.
 %prep
 %setup -q -n %{name}-%{version}-git%{hash}
 
+# From upstream
+%patch0001 -p1
+%patch0002 -p1
 # From QEMU
 %patch1001 -p1
 %patch1002 -p1
@@ -218,6 +226,9 @@ done
 %endif
 
 %changelog
+* Thu Apr 16 2015 Paolo Bonzini <pbonzini@redhat.com> - 20150407-2.gitdc795b9f
+- Fix virtio bug with UEFI driver
+
 * Thu Apr 16 2015 Paolo Bonzini <pbonzini@redhat.com> - 20150407-1.gitdc795b9f
 - Update to latest upstream snapshot
 - Switch source to .tar.xz
