@@ -39,7 +39,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 2.git%{hash}%{?dist}
+Release: 3.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -226,6 +226,9 @@ done
 %endif
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20150407-3.gitdc795b9f
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Thu Apr 16 2015 Paolo Bonzini <pbonzini@redhat.com> - 20150407-2.gitdc795b9f
 - Fix virtio bug with UEFI driver
 
