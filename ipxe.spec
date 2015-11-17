@@ -47,7 +47,6 @@ License: GPLv2 with additional permissions and BSD
 URL:     http://ipxe.org/
 
 Source0: %{name}-%{version}-git%{hash}.tar.xz
-Source1: USAGE
 Source2: config.local.general.h
 
 # From upstream commit b12b1b620fffc89e86af3879a945e7ffaa7c141d
@@ -131,8 +130,6 @@ DNS, HTTP, iSCSI, etc.
 %patch1001 -p1
 %patch1002 -p1
 
-cp -a %{SOURCE1} .
-
 # Apply local configuration tweaks
 cp -a %{SOURCE2} src/config/local/general.h
 
@@ -213,7 +210,7 @@ done
 %{_datadir}/%{name}/ipxe.dsk
 %{_datadir}/%{name}/ipxe.lkrn
 %{_datadir}/%{name}/undionly.kpxe
-%doc COPYING COPYING.GPLv2 COPYING.UBDL USAGE
+%doc COPYING COPYING.GPLv2 COPYING.UBDL
 
 %files roms -f rom.list
 %dir %{_datadir}/%{name}
