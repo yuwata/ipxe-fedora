@@ -54,6 +54,7 @@ Patch0001: 0001-build-Enable-IPv6-for-in-qemu-config.patch
 
 %ifarch %{buildarches}
 BuildRequires: perl
+BuildRequires: perl-Getopt-Long
 BuildRequires: syslinux
 BuildRequires: mtools
 BuildRequires: mkisofs
