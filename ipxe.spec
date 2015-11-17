@@ -34,12 +34,12 @@
 #
 # And then change these two:
 
-%global date 20150407
-%global hash dc795b9f
+%global date 20150821
+%global hash 4e03af8
 
 Name:    ipxe
 Version: %{date}
-Release: 3.git%{hash}%{?dist}
+Release: 1.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -47,16 +47,10 @@ License: GPLv2 with additional permissions and BSD
 URL:     http://ipxe.org/
 
 Source0: %{name}-%{version}-git%{hash}.tar.xz
-Source2: config.local.general.h
 
-# From upstream commit b12b1b620fffc89e86af3879a945e7ffaa7c141d
-Patch0001: 0001-virtio-Downgrade-per-iobuf-debug-messages-to-DBGC2.patch
-# From upstream commit 755d2b8f6be681a2e620534b237471b75f28ed8c
-Patch0002: 0002-efi-Ensure-drivers-are-disconnected-when-ExitBootSer.patch
-
-# From QEMU
-Patch1001: qemu-0001-efi_snp-improve-compliance-with-the-EFI_SIMPLE_NETWO.patch
-Patch1002: qemu-0002-efi-make-load-file-protocol-optional.patch
+# Enable IPv6 for qemu's config
+# Sent upstream: http://lists.ipxe.org/pipermail/ipxe-devel/2015-November/004494.html
+Patch0001: 0001-build-Enable-IPv6-for-in-qemu-config.patch
 
 %ifarch %{buildarches}
 BuildRequires: perl
@@ -122,25 +116,11 @@ DNS, HTTP, iSCSI, etc.
 
 %prep
 %setup -q -n %{name}-%{version}-git%{hash}
-
-# From upstream
 %patch0001 -p1
-%patch0002 -p1
-# From QEMU
-%patch1001 -p1
-%patch1002 -p1
 
-# Apply local configuration tweaks
-cp -a %{SOURCE2} src/config/local/general.h
 
 %build
 %ifarch %{buildarches}
-# The src/Makefile.housekeeping relies on .git/index existing
-# but since we pass GITVERSION= to make, we don't actally need
-# it to be the real deal, so just touch it to let the build pass
-mkdir .git
-touch .git/index
-
 ISOLINUX_BIN=/usr/share/syslinux/isolinux.bin
 cd src
 # ath9k drivers are too big for an Option ROM
@@ -155,9 +135,9 @@ make %{?_smp_mflags} \
 # build roms with efi support for qemu
 mkdir bin-combined
 for rom in %qemuroms; do
-  make NO_WERROR=1 V=1 GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin/${rom}.rom
-  make NO_WERROR=1 V=1 GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-i386-efi/${rom}.efidrv
-  make NO_WERROR=1 V=1 GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-x86_64-efi/${rom}.efidrv
+  make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin/${rom}.rom
+  make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-i386-efi/${rom}.efidrv
+  make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-x86_64-efi/${rom}.efidrv
   vid="0x${rom%%????}"
   did="0x${rom#????}"
   EfiRom -f "$vid" -i "$did" --pci23 \
@@ -223,6 +203,10 @@ done
 %endif
 
 %changelog
+* Tue Nov 17 2015 Cole Robinson <crobinso@redhat.com> - 20150821-1.git4e03af8
+- Update to commit 4e03af8 for qemu 2.5
+- Enable IPv6 (bug 1280318)
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 20150407-3.gitdc795b9f
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
