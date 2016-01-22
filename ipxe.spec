@@ -123,23 +123,27 @@ DNS, HTTP, iSCSI, etc.
 
 %build
 %ifarch %{buildarches}
-ISOLINUX_BIN=/usr/share/syslinux/isolinux.bin
 cd src
 # ath9k drivers are too big for an Option ROM
 rm -rf drivers/net/ath/ath9k
 
-make %{?_smp_mflags} \
-    bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms \
-    ISOLINUX_BIN=${ISOLINUX_BIN} NO_WERROR=1 V=1 \
-    GITVERSION=%{hash} \
-    CROSS_COMPILE=x86_64-linux-gnu-
+make_ipxe() {
+    make %{?_smp_mflags} \
+        NO_WERROR=1 V=1 \
+        GITVERSION=%{hash} \
+        CROSS_COMPILE=x86_64-linux-gnu- \
+        "$@"
+}
+
+make_ipxe ISOLINUX_BIN=/usr/share/syslinux/isolinux.bin \
+    bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms
 
 # build roms with efi support for qemu
 mkdir bin-combined
 for rom in %{qemuroms}; do
-  make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin/${rom}.rom
-  make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-i386-efi/${rom}.efidrv
-  make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-x86_64-efi/${rom}.efidrv
+  make_ipxe CONFIG=qemu bin/${rom}.rom
+  make_ipxe CONFIG=qemu bin-i386-efi/${rom}.efidrv
+  make_ipxe CONFIG=qemu bin-x86_64-efi/${rom}.efidrv
   vid="0x${rom%%????}"
   did="0x${rom#????}"
   EfiRom -f "$vid" -i "$did" --pci23 \
