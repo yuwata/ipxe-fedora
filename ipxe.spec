@@ -133,8 +133,11 @@ make_ipxe() {
         "$@"
 }
 
+make_ipxe bin-i386-efi/ipxe.efi bin-x86_64-efi/ipxe.efi
+
 make_ipxe ISOLINUX_BIN=/usr/share/syslinux/isolinux.bin \
-    bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} allroms
+    bin/undionly.kpxe bin/ipxe.{dsk,iso,usb,lkrn} \
+    allroms
 
 # build roms with efi support for qemu
 mkdir bin-combined
@@ -172,6 +175,9 @@ for fmt in %{formats};do
 done
 popd
 
+cp -a src/bin-i386-efi/ipxe.efi %{buildroot}/%{_datadir}/%{name}/ipxe-i386.efi
+cp -a src/bin-x86_64-efi/ipxe.efi %{buildroot}/%{_datadir}/%{name}/ipxe-x86_64.efi
+
 # the roms supported by qemu will be packaged separatedly
 # remove from the main rom list and add them to qemu.list
 for fmt in rom ;do
@@ -193,6 +199,8 @@ done
 %{_datadir}/%{name}/ipxe.usb
 %{_datadir}/%{name}/ipxe.dsk
 %{_datadir}/%{name}/ipxe.lkrn
+%{_datadir}/%{name}/ipxe-i386.efi
+%{_datadir}/%{name}/ipxe-x86_64.efi
 %{_datadir}/%{name}/undionly.kpxe
 %doc COPYING COPYING.GPLv2 COPYING.UBDL
 
@@ -207,6 +215,10 @@ done
 %endif
 
 %changelog
+* Tue Jan 26 2016 Cole Robinson <crobinso@redhat.com> 20150821-2.git4e03af8
+- Build ipxe.efi (bug 1300865)
+- Build eepro100 rom for qemu
+
 * Tue Nov 17 2015 Cole Robinson <crobinso@redhat.com> - 20150821-1.git4e03af8
 - Update to commit 4e03af8 for qemu 2.5
 - Enable IPv6 (bug 1280318)
