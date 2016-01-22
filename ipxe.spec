@@ -124,8 +124,6 @@ DNS, HTTP, iSCSI, etc.
 %build
 %ifarch %{buildarches}
 cd src
-# ath9k drivers are too big for an Option ROM
-rm -rf drivers/net/ath/ath9k
 
 make_ipxe() {
     make %{?_smp_mflags} \
