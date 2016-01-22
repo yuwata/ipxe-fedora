@@ -9,7 +9,8 @@
 #      e1000: 0x8086 0x100e
 #    rtl8139: 0x10ec 0x8139
 # virtio-net: 0x1af4 0x1000
-%global qemuroms 10222000 10ec8029 8086100e 10ec8139 1af41000
+#   eepro100: 0x8086 0x1209
+%global qemuroms 10222000 10ec8029 8086100e 10ec8139 1af41000 80861209
 
 # We only build the ROMs if on an x86 build host. The resulting
 # binary RPM will be noarch, so other archs will still be able
@@ -135,7 +136,7 @@ make %{?_smp_mflags} \
 
 # build roms with efi support for qemu
 mkdir bin-combined
-for rom in %qemuroms; do
+for rom in %{qemuroms}; do
   make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin/${rom}.rom
   make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-i386-efi/${rom}.efidrv
   make NO_WERROR=1 V=1 CONFIG=qemu GITVERSION=%{hash} CROSS_COMPILE=x86_64-linux-gnu- bin-x86_64-efi/${rom}.efidrv
