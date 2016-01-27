@@ -40,7 +40,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 1.git%{hash}%{?dist}
+Release: 2.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
