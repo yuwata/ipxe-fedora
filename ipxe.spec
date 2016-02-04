@@ -40,7 +40,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 2.git%{hash}%{?dist}
+Release: 3.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -215,6 +215,9 @@ done
 %endif
 
 %changelog
+* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 20150821-3.git4e03af8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Tue Jan 26 2016 Cole Robinson <crobinso@redhat.com> 20150821-2.git4e03af8
 - Build ipxe.efi (bug 1300865)
 - Build eepro100 rom for qemu
