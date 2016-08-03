@@ -10,7 +10,9 @@
 #    rtl8139: 0x10ec 0x8139
 # virtio-net: 0x1af4 0x1000
 #   eepro100: 0x8086 0x1209
-%global qemuroms 10222000 10ec8029 8086100e 10ec8139 1af41000 80861209
+#     e1000e: 0x8086 0x10d3
+#    vmxnet3: 0x15ad 0x07b0
+%global qemuroms 10222000 10ec8029 8086100e 10ec8139 1af41000 80861209 808610d3 15ad07b0
 
 # We only build the ROMs if on an x86 build host. The resulting
 # binary RPM will be noarch, so other archs will still be able
@@ -35,12 +37,12 @@
 #
 # And then change these two:
 
-%global date 20150821
-%global hash 4e03af8
+%global hash 0418631
+%global date 20160622
 
 Name:    ipxe
 Version: %{date}
-Release: 3.git%{hash}%{?dist}
+Release: 1.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -124,6 +126,11 @@ DNS, HTTP, iSCSI, etc.
 %build
 %ifarch %{buildarches}
 cd src
+
+# ath9k drivers are too big for an Option ROM, and ipxe devs say it doesn't
+# make sense anyways
+# http://lists.ipxe.org/pipermail/ipxe-devel/2012-March/001290.html
+rm -rf drivers/net/ath/ath9k
 
 make_ipxe() {
     make %{?_smp_mflags} \
