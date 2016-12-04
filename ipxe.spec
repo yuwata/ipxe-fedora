@@ -37,8 +37,8 @@
 #
 # And then change these two:
 
-%global hash 0418631
-%global date 20160622
+%global hash b991c67
+%global date 20161108
 
 Name:    ipxe
 Version: %{date}
@@ -222,6 +222,9 @@ done
 %endif
 
 %changelog
+* Sun Dec 04 2016 Cole Robinson <crobinso@redhat.com> - 20161108-1.gitb991c67
+- Rebase to version shipped with qemu 2.8
+
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 20150821-3.git4e03af8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 

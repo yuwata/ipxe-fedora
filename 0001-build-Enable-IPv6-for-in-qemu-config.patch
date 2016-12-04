@@ -1,5 +1,5 @@
-From 59b02541da838ce9a0246178deb3c377109589bb Mon Sep 17 00:00:00 2001
-Message-Id: <59b02541da838ce9a0246178deb3c377109589bb.1447780013.git.crobinso@redhat.com>
+From b20b539a701c14af82d94b8ff7c22282fe5454d3 Mon Sep 17 00:00:00 2001
+Message-Id: <b20b539a701c14af82d94b8ff7c22282fe5454d3.1480892146.git.crobinso@redhat.com>
 From: Cole Robinson <crobinso@redhat.com>
 Date: Tue, 17 Nov 2015 11:56:06 -0500
 Subject: [PATCH ipxe] build: Enable IPv6 for in qemu config
@@ -12,16 +12,16 @@ https://bugzilla.redhat.com/show_bug.cgi?id=1280318
  1 file changed, 3 insertions(+)
 
 diff --git a/src/config/qemu/general.h b/src/config/qemu/general.h
-index 30f60d3..61d0ad4 100644
+index a084497..e94eee2 100644
 --- a/src/config/qemu/general.h
 +++ b/src/config/qemu/general.h
-@@ -8,3 +8,6 @@
- 
- /* Work around missing EFI_PXE_BASE_CODE_PROTOCOL */
- #define EFI_DOWNGRADE_UX
+@@ -13,3 +13,6 @@
+  * without unrestricted_guest support
+  */
+ #undef TIVOLI_VMM_WORKAROUND
 +
 +/* Enable IPv6 */
 +#define NET_PROTO_IPV6
 -- 
-2.5.0
+2.9.3
 
