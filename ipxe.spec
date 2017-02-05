@@ -56,7 +56,6 @@ Source0: https://git.ipxe.org/ipxe.git/snapshot/%{gitcommit}.tar.bz2
 # Sent upstream: http://lists.ipxe.org/pipermail/ipxe-devel/2015-November/004494.html
 Patch0001: 0001-build-Enable-IPv6-for-in-qemu-config.patch
 
-%ifarch %{buildarches}
 BuildRequires: perl
 BuildRequires: perl-Getopt-Long
 BuildRequires: syslinux
@@ -112,7 +111,6 @@ DNS, HTTP, iSCSI, etc.
 
 This package contains the iPXE ROMs for devices emulated by QEMU, in
 .rom format.
-%endif
 
 %description
 iPXE is an open source network bootloader. It provides a direct
@@ -125,7 +123,6 @@ DNS, HTTP, iSCSI, etc.
 
 
 %build
-%ifarch %{buildarches}
 cd src
 
 # ath9k drivers are too big for an Option ROM, and ipxe devs say it doesn't
@@ -136,7 +133,7 @@ rm -rf drivers/net/ath/ath9k
 make_ipxe() {
     make %{?_smp_mflags} \
         NO_WERROR=1 V=1 \
-        GITVERSION=%{hash} \
+        GITVERSION=%{gitcommitshort} \
         CROSS_COMPILE=x86_64-linux-gnu- \
         "$@"
 }
@@ -163,10 +160,7 @@ for rom in %{qemuroms}; do
   EfiRom -d  bin-combined/${rom}.rom
 done
 
-%endif
-
 %install
-%ifarch %{buildarches}
 mkdir -p %{buildroot}/%{_datadir}/%{name}/
 mkdir -p %{buildroot}/%{_datadir}/%{name}.efi/
 pushd src/bin/
@@ -198,9 +192,7 @@ for rom in %{qemuroms}; do
   cp src/bin-combined/${rom}.rom %{buildroot}/%{_datadir}/%{name}.efi/
   echo %{_datadir}/%{name}.efi/${rom}.rom >> qemu.rom.list
 done
-%endif
 
-%ifarch %{buildarches}
 %files bootimgs
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/ipxe.iso
@@ -220,7 +212,6 @@ done
 %dir %{_datadir}/%{name}
 %dir %{_datadir}/%{name}.efi
 %doc COPYING COPYING.GPLv2 COPYING.UBDL
-%endif
 
 %changelog
 * Sun Feb 05 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170202-1.git4a4da57
