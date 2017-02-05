@@ -37,19 +37,20 @@
 #
 # And then change these two:
 
-%global hash b991c67
-%global date 20161108
+%global gitcommit 4a4da573dd8ffabff881ee52c2d1151c15d1730e
+%{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
+%global date 20170202
 
 Name:    ipxe
 Version: %{date}
-Release: 1.git%{hash}%{?dist}
+Release: 1.git%{gitcommitshort}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
 License: GPLv2 with additional permissions and BSD
 URL:     http://ipxe.org/
 
-Source0: %{name}-%{version}-git%{hash}.tar.xz
+Source0: https://git.ipxe.org/ipxe.git/snapshot/%{gitcommit}.tar.bz2
 
 # Enable IPv6 for qemu's config
 # Sent upstream: http://lists.ipxe.org/pipermail/ipxe-devel/2015-November/004494.html
@@ -119,7 +120,7 @@ replacement for proprietary PXE ROMs, with many extra features such as
 DNS, HTTP, iSCSI, etc.
 
 %prep
-%setup -q -n %{name}-%{version}-git%{hash}
+%setup -q -n %{name}-%{gitcommitshort}
 %patch0001 -p1
 
 
@@ -222,6 +223,9 @@ done
 %endif
 
 %changelog
+* Sun Feb 05 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170202-1.git4a4da57
+- Update to latest git snapshot 4a4da573dd8ffabff881ee52c2d1151c15d1730e
+
 * Sun Dec 04 2016 Cole Robinson <crobinso@redhat.com> - 20161108-1.gitb991c67
 - Rebase to version shipped with qemu 2.8
 
