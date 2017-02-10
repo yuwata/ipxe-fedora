@@ -42,7 +42,7 @@
 
 Name:    ipxe
 Version: %{date}
-Release: 1.git%{hash}%{?dist}
+Release: 2.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -222,6 +222,9 @@ done
 %endif
 
 %changelog
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 20161108-2.gitb991c67
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Sun Dec 04 2016 Cole Robinson <crobinso@redhat.com> - 20161108-1.gitb991c67
 - Rebase to version shipped with qemu 2.8
 
