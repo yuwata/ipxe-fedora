@@ -37,9 +37,9 @@
 #
 # And then change these two:
 
-%global gitcommit 4a4da573dd8ffabff881ee52c2d1151c15d1730e
+%global gitcommit 30f96c9f41f2596493c6ca18060bebaaaf44415b
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global date 20170202
+%global date 20170207
 
 Name:    ipxe
 Version: %{date}
@@ -214,8 +214,11 @@ done
 %doc COPYING COPYING.GPLv2 COPYING.UBDL
 
 %changelog
-* Sun Feb 05 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170202-1.git4a4da57
-- Update to latest git snapshot 4a4da573dd8ffabff881ee52c2d1151c15d1730e
+* Sun Feb 12 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170207-1.git30f96c9
+- Update to latest git snapshot 30f96c9f41f2596493c6ca18060bebaaaf44415b
+
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 20161108-2.gitb991c67
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
 * Sun Dec 04 2016 Cole Robinson <crobinso@redhat.com> - 20161108-1.gitb991c67
 - Rebase to version shipped with qemu 2.8
