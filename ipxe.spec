@@ -37,9 +37,9 @@
 #
 # And then change these two:
 
-%global gitcommit 30f96c9f41f2596493c6ca18060bebaaaf44415b
+%global gitcommit 553f4857346faa8c5f6ddf9eced4180924890bfc
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global date 20170207
+%global date 20170310
 
 Name:    ipxe
 Version: %{date}
@@ -214,6 +214,9 @@ done
 %doc COPYING COPYING.GPLv2 COPYING.UBDL
 
 %changelog
+* Sun Mar 12 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170310-1.git553f485
+- Update to latest git snapshot 553f4857346faa8c5f6ddf9eced4180924890bfc
+
 * Sun Feb 12 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170207-1.git30f96c9
 - Update to latest git snapshot 30f96c9f41f2596493c6ca18060bebaaaf44415b
 
