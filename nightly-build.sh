@@ -14,13 +14,13 @@ if [[ -z $HASH_OLD ]]; then
 fi
 HASH_OLD_SHORT=${HASH_OLD:0:7}
 
-if ! git -C $REPO_DIR pull upstream ${BRANCH}; then
-    echo "error: 'git pull upstream ${BRANCH}' failed." >&2
+if ! git -C $REPO_DIR fetch upstream master; then
+    echo "error: `git fetch upstream master` failed." >&2
     exit 11
 fi
 
-if ! HASH_NEW=$(git -C $REPO_DIR log -1 --format='%H'); then
-    echo "error: 'git log' failed." >&2
+if ! HASH_NEW=$(git -C $REPO_DIR show-ref --hash refs/remotes/upstream/master); then
+    echo "error: `git show-ref` failed." >&2
     exit 12
 fi
 HASH_NEW_SHORT=${HASH_NEW:0:7}
