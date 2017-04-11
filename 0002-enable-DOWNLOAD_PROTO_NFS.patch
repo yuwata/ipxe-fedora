@@ -1,0 +1,22 @@
+From a8a1e4e2050d41195d448854240081813bdf72ad Mon Sep 17 00:00:00 2001
+From: Yu Watanabe <watanabe.yu+github@gmail.com>
+Date: Tue, 11 Apr 2017 13:06:46 +0900
+Subject: [PATCH] enable DOWNLOAD_PROTO_NFS
+
+---
+ src/config/general.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/config/general.h b/src/config/general.h
+index fb1ac93..19e099d 100644
+--- a/src/config/general.h
++++ b/src/config/general.h
+@@ -57,7 +57,7 @@ FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
+ #undef	DOWNLOAD_PROTO_HTTPS	/* Secure Hypertext Transfer Protocol */
+ #undef	DOWNLOAD_PROTO_FTP	/* File Transfer Protocol */
+ #undef	DOWNLOAD_PROTO_SLAM	/* Scalable Local Area Multicast */
+-#undef	DOWNLOAD_PROTO_NFS	/* Network File System Protocol */
++#define	DOWNLOAD_PROTO_NFS	/* Network File System Protocol */
+ //#undef DOWNLOAD_PROTO_FILE	/* Local filesystem access */
+ 
+ /*

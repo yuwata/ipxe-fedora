@@ -37,9 +37,9 @@
 #
 # And then change these two:
 
-%global gitcommit 9ecad204fc8e55bc34ffb4b3ef8f19e57729308b
+%global gitcommit a8a1e4e2050d41195d448854240081813bdf72ad
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
-%global date 20170322
+%global date 20170411
 
 Name:    ipxe
 Version: %{date}
@@ -55,6 +55,8 @@ Source0: https://git.ipxe.org/ipxe.git/snapshot/%{gitcommit}.tar.bz2
 # Enable IPv6 for qemu's config
 # Sent upstream: http://lists.ipxe.org/pipermail/ipxe-devel/2015-November/004494.html
 Patch0001: 0001-build-Enable-IPv6-for-in-qemu-config.patch
+
+Patch0002: 0002-enable-DOWNLOAD_PROTO_NFS.patch
 
 BuildRequires: perl
 BuildRequires: perl-Getopt-Long
@@ -119,6 +121,7 @@ DNS, HTTP, iSCSI, etc.
 
 %prep
 %setup -q -n %{name}-%{gitcommitshort}
+%patch0001 -p1
 %patch0001 -p1
 
 
@@ -214,6 +217,9 @@ done
 %doc COPYING COPYING.GPLv2 COPYING.UBDL
 
 %changelog
+* Tue Apr 11 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170411-1.gita8a1e4e
+- Update to latest git snapshot a8a1e4e2050d41195d448854240081813bdf72ad
+
 * Thu Mar 23 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170322-1.git9ecad20
 - Update to latest git snapshot 9ecad204fc8e55bc34ffb4b3ef8f19e57729308b
 
