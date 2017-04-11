@@ -122,7 +122,7 @@ DNS, HTTP, iSCSI, etc.
 %prep
 %setup -q -n %{name}-%{gitcommitshort}
 %patch0001 -p1
-%patch0001 -p1
+%patch0002 -p1
 
 
 %build
