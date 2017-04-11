@@ -219,6 +219,7 @@ done
 %changelog
 * Tue Apr 11 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170411-1.gita8a1e4e
 - Update to latest git snapshot a8a1e4e2050d41195d448854240081813bdf72ad
+- Enable DOWNLOAD_PROTO_NFS
 
 * Thu Mar 23 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170322-1.git9ecad20
 - Update to latest git snapshot 9ecad204fc8e55bc34ffb4b3ef8f19e57729308b
