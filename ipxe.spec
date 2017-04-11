@@ -37,7 +37,7 @@
 #
 # And then change these two:
 
-%global gitcommit a8a1e4e2050d41195d448854240081813bdf72ad
+%global gitcommit 6c7487d00d4659aa4eec6943dfcdec1af6b5d1b9
 %{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
 %global date 20170411
 
@@ -217,6 +217,9 @@ done
 %doc COPYING COPYING.GPLv2 COPYING.UBDL
 
 %changelog
+* Tue Apr 11 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170411-1.git6c7487d
+- Update to latest git snapshot 6c7487d00d4659aa4eec6943dfcdec1af6b5d1b9
+
 * Tue Apr 11 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170411-1.gita8a1e4e
 - Update to latest git snapshot a8a1e4e2050d41195d448854240081813bdf72ad
 - Enable DOWNLOAD_PROTO_NFS
