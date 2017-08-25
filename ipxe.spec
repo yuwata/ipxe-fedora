@@ -235,6 +235,12 @@ done
 * Sun Feb 12 2017 Yu Watanabe <watanabe.yu@gmail.com> - 20170207-1.git30f96c9
 - Update to latest git snapshot 30f96c9f41f2596493c6ca18060bebaaaf44415b
 
+* Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 20161108-4.gitb991c67
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 20161108-3.gitb991c67
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 20161108-2.gitb991c67
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
