@@ -38,12 +38,12 @@
 # And then change these two:
 
 %global gitcommit 17887f87b78fe5f0ac52f23a4eb0584794462d84
-%{?gitcommit:%global gitcommitshort %(c=%{gitcommit}; echo ${c:0:7})}
+%{?gitcommit:%global hash %(c=%{gitcommit}; echo ${c:0:7})}
 %global date 20170501
 
 Name:    ipxe
 Version: %{date}
-Release: 1.git%{gitcommitshort}%{?dist}
+Release: 1.git%{hash}%{?dist}
 Summary: A network boot loader
 
 Group:   System Environment/Base
@@ -55,8 +55,6 @@ Source0: https://git.ipxe.org/ipxe.git/snapshot/%{gitcommit}.tar.bz2
 # Enable IPv6 for qemu's config
 # Sent upstream: http://lists.ipxe.org/pipermail/ipxe-devel/2015-November/004494.html
 Patch0001: 0001-build-Enable-IPv6-for-in-qemu-config.patch
-
-Patch0002: 0002-enable-DOWNLOAD_PROTO_NFS.patch
 
 BuildRequires: perl
 BuildRequires: perl-Getopt-Long
@@ -120,10 +118,8 @@ replacement for proprietary PXE ROMs, with many extra features such as
 DNS, HTTP, iSCSI, etc.
 
 %prep
-%setup -q -n %{name}-%{gitcommitshort}
+%setup -q -n %{name}-%{hash}
 %patch0001 -p1
-%patch0002 -p1
-
 
 %build
 cd src
@@ -136,7 +132,7 @@ rm -rf drivers/net/ath/ath9k
 make_ipxe() {
     make %{?_smp_mflags} \
         NO_WERROR=1 V=1 \
-        GITVERSION=%{gitcommitshort} \
+        GITVERSION=%{hash} \
         CROSS_COMPILE=x86_64-linux-gnu- \
         "$@"
 }
