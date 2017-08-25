@@ -56,7 +56,7 @@ Source0: https://git.ipxe.org/ipxe.git/snapshot/%{gitcommit}.tar.bz2
 # Sent upstream: http://lists.ipxe.org/pipermail/ipxe-devel/2015-November/004494.html
 Patch0001: 0001-build-Enable-IPv6-for-in-qemu-config.patch
 
-BuildRequires: perl
+BuildRequires: perl-interpreter
 BuildRequires: perl-Getopt-Long
 BuildRequires: syslinux
 BuildRequires: mtools
